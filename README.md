@@ -1,171 +1,113 @@
 # LalIA
 
-LalIA es un IDE local con asistente integrado para trabajar con proyectos de código usando Ollama. La idea es tener una experiencia cómoda tipo VS Code + Codex, pero local, ligera y adaptada a tus proyectos.
+LalIA es un IDE local con asistente integrado usando Ollama. Está pensado para trabajar proyectos reales sin depender de un servicio caro tipo Trae/Codex: abrir carpetas, editar archivos, revisar errores, mandar contexto al chat, visualizar localhost y correr comandos desde la misma app.
 
-## Estado de esta versión
+Sitio: https://www.evazquez.me  
+Repositorio: https://github.com/equis01/LalIA
 
-**Versión:** 20.2
+## Qué incluye esta versión
 
-Esta versión corrige el error:
-
-```txt
-TypeError: history.slice is not a function
-```
-
-La causa era que versiones anteriores guardaban el historial como arreglo, pero las versiones nuevas guardan chats por proyecto en un objeto. Ahora LalIA acepta ambos formatos y no debe romperse aunque uses historial viejo o nuevo.
-
-## Qué incluye
-
-- Inicio por defecto cuando no hay archivo abierto.
-- Interfaz tipo IDE con barra izquierda:
-  - Explorer
-  - Search
-  - Source Control
-  - Run and Debug
-  - Extensiones
-- Menú superior estilo VS Code, adaptado a LalIA.
-- Explorador de archivos y carpetas.
-- Editor Monaco.
-- Tabs de archivos abiertos.
-- Chat lateral con historial por proyecto.
-- Historial editable:
-  - crear nuevo chat
-  - cambiar nombre
-  - borrar con confirmación
-  - ver chats de otros proyectos
-- Botón **Analiza Proyecto**.
-- Soporte para pegar o adjuntar hasta 2 imágenes en el chat.
-- Preview localhost dentro del IDE.
-- Panel inferior dividido:
-  - Problemas
-  - Terminal / Consola
-- Terminal oculta por defecto al abrir.
-- Click en CPU/RAM para abrir **Task Manager LalIA**.
-- Detección básica de proyecto:
-  - Node / Web
-  - Flutter
-  - Firebase
-  - Apps Script
-- Instalación/actualización sugerida de modelos Ollama.
-- Integración para **Open with LalIA** al compilar/instalar en Windows.
+- Interfaz en español.
+- Pantalla de Inicio ajustable, para que siempre quepa mejor en la ventana.
+- Explorador de archivos estilo VS Code.
+- Crear archivos y carpetas.
+- Renombrar y eliminar con confirmación.
+- Menú contextual en archivos y carpetas.
+- Vista previa de localhost como pestaña interna del IDE.
+- Panel inferior oculto por defecto.
+- Panel inferior con Problemas, Salida y Terminal.
+- Atajo `Ctrl + Ñ` para abrir/cerrar el panel inferior.
+- Atajo `Ctrl + U` para agregar selección/código al chat.
+- Historial de chats por proyecto.
+- Cambiar nombre y borrar chats.
+- Prompt para instalar/actualizar modelos recomendados de Ollama.
+- Task Manager de LalIA al hacer clic en CPU/RAM.
+- Soporte para “Open with LalIA” al compilar e instalar.
 
 ## Requisitos
 
-- Windows 10/11 recomendado.
-- Node.js 18 o superior.
-- npm.
-- Ollama instalado si quieres usar modelos locales.
+- Node.js LTS
+- npm
+- Ollama instalado
+- Windows 10/11 recomendado
 
-Modelos sugeridos:
+## Modelos recomendados de Ollama
+
+LalIA usa por defecto:
 
 ```bash
 ollama pull qwen2.5-coder:3b
 ollama pull gemma3:1b
 ```
 
-## Ejecutar en modo desarrollo
+Al abrir LalIA por primera vez, puede preguntarte si quieres instalar/actualizar esos modelos. Si aceptas, ejecutará los `ollama pull` desde la terminal interna.
+
+## Comandos de limpieza y desarrollo
+
+Cuando quieras reinstalar dependencias desde cero:
+
+```cmd
+rmdir /s /q node_modules
+del package-lock.json
+npm install
+npm run dev
+npm run dist:dir
+npm run dist
+```
+
+> Nota: el comando correcto para generar carpeta sin instalador es `npm run dist:dir`. Si escribes `npm dist:dir`, npm lo tomará como un comando inválido.
+
+## Desarrollo
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Compilar instalador
+## Build / instalación
+
+Generar build instalable:
 
 ```bash
 npm run dist
 ```
 
-Los archivos se generan en:
-
-```txt
-release/
-```
-
-## Compilar portable
+Generar carpeta ejecutable sin instalador:
 
 ```bash
-npm run dist:portable
+npm run dist:dir
 ```
 
-## Open with LalIA
-
-Para que aparezca **Open with LalIA** en Windows, compila e instala la aplicación:
-
-```bash
-npm run dist
-```
-
-Después instala el `.exe` generado en `release/`.
-
-Debería aparecer en el menú contextual para:
-
-- archivos
-- carpetas
-- fondo de carpeta
-
-## Uso básico
-
-1. Abre LalIA.
-2. En Inicio, selecciona **Abrir carpeta**.
-3. Abre archivos desde Explorer.
-4. Escribe instrucciones en el chat.
-5. Usa **Ctrl+U** para mandar contexto al chat.
-6. Usa **F5** para correr `npm run dev`.
-7. Usa el preview para abrir `localhost:5173`, `localhost:3000` o el puerto que necesites.
-8. Haz clic en CPU/RAM para abrir el Task Manager interno.
+Los archivos salen en `release/`.
 
 ## Atajos principales
 
 | Atajo | Acción |
 |---|---|
-| Ctrl+Shift+P | Command Palette |
-| Ctrl+U | Agregar selección/contexto al chat |
-| Ctrl+S | Guardar archivo |
-| F5 | Ejecutar `npm run dev` |
-| Ctrl+Ñ | Mostrar/ocultar terminal |
+| `Ctrl + Shift + P` | Paleta de comandos |
+| `Ctrl + U` | Agregar selección al chat |
+| `Ctrl + Ñ` | Abrir/cerrar panel inferior |
+| `Ctrl + S` | Guardar archivo |
+| `F5` | Ejecutar `npm run dev` |
+
+## Vista previa localhost
+
+La vista previa se abre dentro de LalIA como pestaña. Puedes usar:
+
+- `http://localhost:5173`
+- `http://localhost:3000`
+- `http://localhost:8080`
 
 ## Historial de chats
 
-LalIA guarda chats por proyecto/carpeta. También puede mostrar chats de otros proyectos para que no se pierdan cuando cambias carpetas.
+El historial se guarda por proyecto, pero también puede mostrar chats de otros proyectos. Esto ayuda cuando una carpeta se mueve o cambia de ubicación.
 
-Puedes:
+## Roadmap sugerido
 
-- renombrar chats
-- borrar chats con confirmación
-- abrir chats de otro proyecto en la misma ventana
-- abrirlos en otra ventana cuando corresponda
-
-## Preview localhost
-
-Desde Inicio o la pestaña Preview puedes abrir:
-
-```txt
-http://localhost:5173
-http://localhost:3000
-http://localhost:8080
-```
-
-También puedes escribir cualquier URL local.
-
-## Problemas conocidos
-
-- El preview localhost depende de que tu servidor esté corriendo.
-- La terminal usa el shell disponible en Windows.
-- Algunas funciones de Git/Source Control son base inicial y se pueden mejorar en siguientes versiones.
-- El instalador es necesario para registrar correctamente **Open with LalIA**.
-
-## Siguientes mejoras recomendadas
-
-- Source Control más completo.
-- Búsqueda real en todo el proyecto.
-- Extensiones internas más potentes.
-- Aplicar cambios con diff antes de sobrescribir.
-- Más controles del Task Manager.
-- Mejor manejo de sesiones y ventanas múltiples.
-
-## Marca
-
-LalIA es un proyecto de Medios con Valor.
-
-Página: https://www.evazquez.me
+- Búsqueda real en proyecto.
+- Git visual con cambios, commits y ramas.
+- Extensiones internas para Flutter, Firebase y Apps Script.
+- Aplicar parches directamente desde respuestas de LalIA.
+- Indexado local del proyecto para mejor contexto.
+- Tareas guardadas por proyecto (`npm run dev`, `flutter run`, `firebase deploy`, etc.).
+- Preview con perfiles móvil/tablet/desktop más completos.

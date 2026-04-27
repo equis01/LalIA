@@ -1,7 +1,7 @@
 {
   "name": "lalia-local-ide",
-  "version": "20.2.0",
-  "description": "LalIA v20.2 - IDE local con Ollama",
+  "version": "21.0.0",
+  "description": "LalIA v21 - IDE local en español con preview interno, historial, Explorer CRUD y README actualizado",
   "main": "electron/main.cjs",
   "author": "Medios Con Valor",
   "private": true,

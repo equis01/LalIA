@@ -36,13 +36,11 @@ async function openPathFromSystem(targetPath) {
     const stat = await fs.stat(targetPath);
     if (stat.isDirectory()) {
       openedFolder = targetPath;
-      startShell(openedFolder);
       safeSend('system:openPath', { kind: 'folder', folderPath: openedFolder, tree: await buildTree(openedFolder) });
       return;
     }
     const dir = path.dirname(targetPath);
     openedFolder = dir;
-    startShell(openedFolder);
     const ext = path.extname(targetPath).toLowerCase();
     const rel = path.relative(openedFolder, targetPath).replace(/\\/g, '/');
     const payload = { kind: 'file', folderPath: openedFolder, tree: await buildTree(openedFolder), path: rel };
@@ -110,45 +108,45 @@ app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) creat
 
 function createAppMenu() {
   const template = [
-    { label: 'File', submenu: [
-      { label: 'New Text File', accelerator: 'CmdOrCtrl+N', click: () => safeSend('menu:action', 'show-home') },
-      { label: 'Open File...', accelerator: 'CmdOrCtrl+O', click: () => safeSend('menu:action', 'open-file') },
-      { label: 'Open Folder...', accelerator: 'CmdOrCtrl+K', click: () => safeSend('menu:action', 'open-folder') },
+    { label: 'Archivo', submenu: [
+      { label: 'Nuevo archivo de texto', accelerator: 'CmdOrCtrl+N', click: () => safeSend('menu:action', 'show-home') },
+      { label: 'Abrir archivo...', accelerator: 'CmdOrCtrl+O', click: () => safeSend('menu:action', 'open-file') },
+      { label: 'Abrir carpeta...', accelerator: 'CmdOrCtrl+K', click: () => safeSend('menu:action', 'open-folder') },
       { type: 'separator' },
-      { label: 'Save', accelerator: 'CmdOrCtrl+S', click: () => safeSend('menu:action', 'save-file') },
+      { label: 'Guardar', accelerator: 'CmdOrCtrl+S', click: () => safeSend('menu:action', 'save-file') },
       { type: 'separator' },
-      { label: 'Exit', role: process.platform === 'darwin' ? 'close' : 'quit' }
+      { label: 'Salir', role: process.platform === 'darwin' ? 'close' : 'quit' }
     ] },
-    { label: 'Edit', submenu: [
-      { role: 'undo', label: 'Undo' }, { role: 'redo', label: 'Redo' }, { type: 'separator' },
-      { role: 'cut', label: 'Cut' }, { role: 'copy', label: 'Copy' }, { role: 'paste', label: 'Paste' },
-      { type: 'separator' }, { label: 'Command Palette...', accelerator: 'CmdOrCtrl+Shift+P', click: () => safeSend('menu:action', 'command-palette') }
+    { label: 'Editar', submenu: [
+      { role: 'undo', label: 'Deshacer' }, { role: 'redo', label: 'Rehacer' }, { type: 'separator' },
+      { role: 'cut', label: 'Cortar' }, { role: 'copy', label: 'Copiar' }, { role: 'paste', label: 'Pegar' },
+      { type: 'separator' }, { label: 'Paleta de comandos...', accelerator: 'CmdOrCtrl+Shift+P', click: () => safeSend('menu:action', 'command-palette') }
     ] },
-    { label: 'Selection', submenu: [
-      { role: 'selectAll', label: 'Select All' },
-      { label: 'Add Selection to LalIA Chat', accelerator: 'CmdOrCtrl+U', click: () => safeSend('menu:action', 'add-selection') }
+    { label: 'Selección', submenu: [
+      { role: 'selectAll', label: 'Seleccionar todo' },
+      { label: 'Agregar selección al chat de LalIA', accelerator: 'CmdOrCtrl+U', click: () => safeSend('menu:action', 'add-selection') }
     ] },
-    { label: 'View', submenu: [
-      { label: 'Command Palette...', accelerator: 'CmdOrCtrl+Shift+P', click: () => safeSend('menu:action', 'command-palette') },
-      { label: 'Explorer', click: () => safeSend('menu:action', 'show-home') },
-      { label: 'Search', click: () => safeSend('menu:action', 'show-search') },
-      { label: 'Source Control', click: () => safeSend('menu:action', 'show-source') },
-      { label: 'Run and Debug', click: () => safeSend('menu:action', 'show-run') },
-      { label: 'Extensions', click: () => safeSend('menu:action', 'show-extensions') },
-      { type: 'separator' }, { label: 'Terminal / Console', accelerator: 'CmdOrCtrl+T', click: () => safeSend('menu:action', 'toggle-powershell') },
-      { label: 'Reload Window', role: 'reload' }, { label: 'Toggle Full Screen', role: 'togglefullscreen' }, { label: 'Developer Tools', role: 'toggleDevTools' }
+    { label: 'Ver', submenu: [
+      { label: 'Paleta de comandos...', accelerator: 'CmdOrCtrl+Shift+P', click: () => safeSend('menu:action', 'command-palette') },
+      { label: 'Explorador', click: () => safeSend('menu:action', 'show-home') },
+      { label: 'Buscar', click: () => safeSend('menu:action', 'show-search') },
+      { label: 'Control de código fuente', click: () => safeSend('menu:action', 'show-source') },
+      { label: 'Ejecutar y depurar', click: () => safeSend('menu:action', 'show-run') },
+      { label: 'Extensiones', click: () => safeSend('menu:action', 'show-extensions') },
+      { type: 'separator' }, { label: 'Panel inferior / Terminal', accelerator: 'CmdOrCtrl+T', click: () => safeSend('menu:action', 'toggle-powershell') },
+      { label: 'Recargar ventana', role: 'reload' }, { label: 'Pantalla completa', role: 'togglefullscreen' }, { label: 'Herramientas de desarrollador', role: 'toggleDevTools' }
     ] },
-    { label: 'Go', submenu: [
-      { label: 'Go to File...', accelerator: 'CmdOrCtrl+P', click: () => safeSend('menu:action', 'command-palette') },
-      { label: 'Go to Source Control', click: () => safeSend('menu:action', 'show-source') }
+    { label: 'Ir', submenu: [
+      { label: 'Ir a archivo...', accelerator: 'CmdOrCtrl+P', click: () => safeSend('menu:action', 'command-palette') },
+      { label: 'Ir a control de código fuente', click: () => safeSend('menu:action', 'show-source') }
     ] },
     { label: '...', submenu: [
-      { label: 'Run npm run dev', accelerator: 'F5', click: () => safeSend('menu:action', 'run-dev') },
-      { label: 'New Terminal', click: () => safeSend('menu:action', 'toggle-powershell') },
+      { label: 'Ejecutar npm run dev', accelerator: 'F5', click: () => safeSend('menu:action', 'run-dev') },
+      { label: 'Nueva terminal', click: () => safeSend('menu:action', 'toggle-powershell') },
       { type: 'separator' },
-      { label: 'Página de Medios con Valor', click: () => shell.openExternal('https://mediosconvalor.com') },
-      { label: 'LalIA Help', click: () => shell.openExternal('https://mediosconvalor.com') },
-      { label: 'About LalIA', click: () => safeSend('menu:action', 'about') }
+      { label: 'Página de Eva Vázquez', click: () => shell.openExternal('https://www.evazquez.me') },
+      { label: 'Repositorio de LalIA', click: () => shell.openExternal('https://github.com/equis01/LalIA') },
+      { label: 'Acerca de LalIA', click: () => safeSend('menu:action', 'about') }
     ] }
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -217,7 +215,6 @@ ipcMain.handle('dialog:openFolder', async () => {
   const result = await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory'] });
   if (result.canceled || !result.filePaths?.[0]) return null;
   openedFolder = result.filePaths[0];
-  startShell(openedFolder);
   return { folderPath: openedFolder, tree: await buildTree(openedFolder) };
 });
 
@@ -226,7 +223,6 @@ ipcMain.handle('dialog:openFolderPath', async (_event, folderPath) => {
   const stat = await fs.stat(folderPath);
   if (!stat.isDirectory()) return null;
   openedFolder = folderPath;
-  startShell(openedFolder);
   return { folderPath: openedFolder, tree: await buildTree(openedFolder) };
 });
 
@@ -244,7 +240,6 @@ ipcMain.handle('dialog:openFile', async () => {
   const dir = path.dirname(fullPath);
   if (!openedFolder || !isPathInside(openedFolder, fullPath)) {
     openedFolder = dir;
-    startShell(openedFolder);
   }
   const rel = path.relative(openedFolder, fullPath).replace(/\\/g, '/');
   const content = await fs.readFile(fullPath, 'utf8');
@@ -272,6 +267,67 @@ ipcMain.handle('files:writeFile', async (_event, relPath, content) => {
   if (!isPathInside(openedFolder, fullPath)) throw new Error('Ruta no permitida.');
   await fs.mkdir(path.dirname(fullPath), { recursive: true });
   await fs.writeFile(fullPath, content, 'utf8');
+  return { ok: true };
+});
+
+
+ipcMain.handle('files:createFile', async (_event, relPath, content = '') => {
+  if (!openedFolder) throw new Error('No hay carpeta abierta.');
+  const safeRel = normalizeRel(relPath);
+  if (!safeRel) throw new Error('Nombre de archivo vacío.');
+  const fullPath = path.join(openedFolder, safeRel);
+  if (!isPathInside(openedFolder, fullPath)) throw new Error('Ruta no permitida.');
+  if (fss.existsSync(fullPath)) throw new Error('Ya existe un archivo o carpeta con ese nombre.');
+  await fs.mkdir(path.dirname(fullPath), { recursive: true });
+  await fs.writeFile(fullPath, content, 'utf8');
+  return { ok: true, path: safeRel, tree: await buildTree(openedFolder) };
+});
+
+ipcMain.handle('files:createFolder', async (_event, relPath) => {
+  if (!openedFolder) throw new Error('No hay carpeta abierta.');
+  const safeRel = normalizeRel(relPath);
+  if (!safeRel) throw new Error('Nombre de carpeta vacío.');
+  const fullPath = path.join(openedFolder, safeRel);
+  if (!isPathInside(openedFolder, fullPath)) throw new Error('Ruta no permitida.');
+  await fs.mkdir(fullPath, { recursive: true });
+  return { ok: true, path: safeRel, tree: await buildTree(openedFolder) };
+});
+
+ipcMain.handle('files:rename', async (_event, oldRelPath, newRelPath) => {
+  if (!openedFolder) throw new Error('No hay carpeta abierta.');
+  const oldRel = normalizeRel(oldRelPath);
+  const newRel = normalizeRel(newRelPath);
+  if (!oldRel || !newRel) throw new Error('Ruta inválida.');
+  const oldFull = path.join(openedFolder, oldRel);
+  const newFull = path.join(openedFolder, newRel);
+  if (!isPathInside(openedFolder, oldFull) || !isPathInside(openedFolder, newFull)) throw new Error('Ruta no permitida.');
+  if (!fss.existsSync(oldFull)) throw new Error('El archivo/carpeta original no existe.');
+  if (fss.existsSync(newFull)) throw new Error('Ya existe un archivo o carpeta con ese nombre.');
+  await fs.mkdir(path.dirname(newFull), { recursive: true });
+  await fs.rename(oldFull, newFull);
+  return { ok: true, oldPath: oldRel, newPath: newRel, tree: await buildTree(openedFolder) };
+});
+
+ipcMain.handle('files:delete', async (_event, relPath) => {
+  if (!openedFolder) throw new Error('No hay carpeta abierta.');
+  const safeRel = normalizeRel(relPath);
+  if (!safeRel) throw new Error('Ruta inválida.');
+  const fullPath = path.join(openedFolder, safeRel);
+  if (!isPathInside(openedFolder, fullPath)) throw new Error('Ruta no permitida.');
+  if (!fss.existsSync(fullPath)) throw new Error('No existe.');
+  const stat = await fs.stat(fullPath);
+  if (stat.isDirectory()) await fs.rm(fullPath, { recursive: true, force: true });
+  else await fs.unlink(fullPath);
+  return { ok: true, path: safeRel, tree: await buildTree(openedFolder) };
+});
+
+ipcMain.handle('files:reveal', async (_event, relPath) => {
+  if (!openedFolder) throw new Error('No hay carpeta abierta.');
+  const safeRel = normalizeRel(relPath || '');
+  const fullPath = path.join(openedFolder, safeRel);
+  if (!isPathInside(openedFolder, fullPath)) throw new Error('Ruta no permitida.');
+  if (fss.existsSync(fullPath)) shell.showItemInFolder(fullPath);
+  else shell.openPath(openedFolder);
   return { ok: true };
 });
 
