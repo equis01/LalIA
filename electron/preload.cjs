@@ -1,0 +1,24 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('laloAPI', {
+  openFolder: () => ipcRenderer.invoke('dialog:openFolder'),
+  openFolderPath: (folderPath) => ipcRenderer.invoke('dialog:openFolderPath', folderPath),
+  openFileDialog: () => ipcRenderer.invoke('dialog:openFile'),
+  refreshTree: () => ipcRenderer.invoke('files:refreshTree'),
+  readFile: (path) => ipcRenderer.invoke('files:readFile', path),
+  writeFile: (path, content) => ipcRenderer.invoke('files:writeFile', path, content),
+  applyChanges: (changes) => ipcRenderer.invoke('files:applyChanges', changes),
+  getProjectContext: (options) => ipcRenderer.invoke('files:getProjectContext', options),
+  loadHistory: () => ipcRenderer.invoke('history:load'),
+  saveHistory: (history) => ipcRenderer.invoke('history:save', history),
+  clearHistory: () => ipcRenderer.invoke('history:clear'),
+  shellStart: (folderPath) => ipcRenderer.invoke('shell:start', folderPath),
+  shellSend: (command) => ipcRenderer.invoke('shell:send', command),
+  shellStop: () => ipcRenderer.invoke('shell:stop'),
+  onShellData: (callback) => ipcRenderer.on('shell:data', (_event, data) => callback(data)),
+  onMenuAction: (callback) => { const listener = (_event, action) => callback(action); ipcRenderer.on('menu:action', listener); return () => ipcRenderer.removeListener('menu:action', listener); },
+  onOpenPath: (callback) => { const listener = (_event, payload) => callback(payload); ipcRenderer.on('system:openPath', listener); return () => ipcRenderer.removeListener('system:openPath', listener); },
+  getSystemStats: () => ipcRenderer.invoke('system:stats'),
+  listModels: () => ipcRenderer.invoke('ollama:listModels'),
+  openPathInNewWindow: (targetPath) => ipcRenderer.invoke('system:openPathInNewWindow', targetPath)
+});
