@@ -25,5 +25,6 @@ contextBridge.exposeInMainWorld('laloAPI', {
   onOpenPath: (callback) => { const listener = (_event, payload) => callback(payload); ipcRenderer.on('system:openPath', listener); return () => ipcRenderer.removeListener('system:openPath', listener); },
   getSystemStats: () => ipcRenderer.invoke('system:stats'),
   listModels: () => ipcRenderer.invoke('ollama:listModels'),
-  openPathInNewWindow: (targetPath) => ipcRenderer.invoke('system:openPathInNewWindow', targetPath)
+  openPathInNewWindow: (targetPath) => ipcRenderer.invoke('system:openPathInNewWindow', targetPath),
+  openAbout: () => ipcRenderer.invoke('app:openAbout')
 });

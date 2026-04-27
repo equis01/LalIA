@@ -8,6 +8,7 @@ const { spawn } = require('child_process');
 
 const isDev = !app.isPackaged;
 let mainWindow;
+let aboutWindow = null;
 let openedFolder = null;
 let shellProc = null;
 let shellCwd = process.env.USERPROFILE || process.cwd();
@@ -17,6 +18,10 @@ let pendingLaunchPath = null;
 const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'release', 'build', '.next', '.vite', '.cache', 'coverage', '.dart_tool', '.gradle', 'ios/Pods']);
 const SKIP_EXTS = new Set(['.png','.jpg','.jpeg','.gif','.webp','.ico','.pdf','.zip','.rar','.7z','.exe','.dll','.bin','.mp4','.mov','.avi','.mp3','.wav','.ttf','.otf','.db','.sqlite']);
 const TEXT_EXTS = new Set(['.js','.jsx','.ts','.tsx','.json','.html','.css','.scss','.md','.txt','.yml','.yaml','.xml','.php','.py','.dart','.java','.kt','.swift','.c','.cpp','.h','.cs','.go','.rs','.sql','.env','.gitignore','.ps1','.bat','.cmd']);
+
+const APP_AUTHOR = 'Eduardo Vázquez (equisx01)';
+const OFFICIAL_WEBSITE = 'https://www.evazquez.me';
+const OFFICIAL_REPO = 'https://github.com/equisx01/lalia';
 
 function pickLaunchPath(argv = process.argv) {
   const candidates = argv
@@ -52,12 +57,100 @@ async function openPathFromSystem(targetPath) {
   }
 }
 
+function fileExists(p) {
+  try { return fss.existsSync(p); } catch { return false; }
+}
+
+function canReachDevServer(urlString) {
+  return new Promise((resolve) => {
+    try {
+      const u = new URL(urlString);
+      const req = http.get({ hostname: u.hostname, port: u.port || 80, path: '/', timeout: 800 }, (res) => {
+        res.resume();
+        resolve(res.statusCode >= 200 && res.statusCode < 500);
+      });
+      req.on('timeout', () => { req.destroy(); resolve(false); });
+      req.on('error', () => resolve(false));
+    } catch {
+      resolve(false);
+    }
+  });
+}
+
+async function loadMainContent() {
+  if (!mainWindow) return;
+  const distIndex = path.join(__dirname, '../dist/index.html');
+
+  if (!isDev) {
+    if (fileExists(distIndex)) {
+      try {
+        await mainWindow.loadFile(distIndex);
+        return;
+      } catch {}
+    }
+    const html = `
+    <!doctype html>
+    <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>LalIA</title>
+    <style>
+      body{margin:0;background:#070b14;color:#e5e7eb;font-family:Segoe UI,system-ui,sans-serif}
+      .wrap{max-width:860px;margin:40px auto;padding:0 18px}
+      .card{background:#0b1220;border:1px solid #1f2a3d;border-radius:16px;padding:18px}
+      h1{margin:0 0 8px 0;font-size:20px}
+      p{margin:10px 0;color:#cbd5e1;line-height:1.5}
+      code{background:#111827;border:1px solid #1f2a3d;border-radius:8px;padding:2px 6px}
+    </style></head>
+    <body><div class="wrap"><div class="card">
+      <h1>LalIA no pudo iniciar la UI</h1>
+      <p>No existe un build en <code>dist/</code> y la app no está en modo desarrollo.</p>
+      <p>Si estás en desarrollo, ejecuta <code>npm install</code> y luego <code>npm run dev</code>.</p>
+    </div></div></body></html>`;
+    await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    return;
+  }
+
+  const devUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173';
+  const ok = await canReachDevServer(devUrl);
+  if (ok) {
+    try {
+      await mainWindow.loadURL(devUrl);
+      return;
+    } catch {}
+  }
+
+  if (fileExists(distIndex)) {
+    try {
+      await mainWindow.loadFile(distIndex);
+      return;
+    } catch {}
+  }
+
+  const html = `
+  <!doctype html>
+  <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>LalIA</title>
+  <style>
+    body{margin:0;background:#070b14;color:#e5e7eb;font-family:Segoe UI,system-ui,sans-serif}
+    .wrap{max-width:860px;margin:40px auto;padding:0 18px}
+    .card{background:#0b1220;border:1px solid #1f2a3d;border-radius:16px;padding:18px}
+    h1{margin:0 0 8px 0;font-size:20px}
+    p{margin:10px 0;color:#cbd5e1;line-height:1.5}
+    code{background:#111827;border:1px solid #1f2a3d;border-radius:8px;padding:2px 6px}
+  </style></head>
+  <body><div class="wrap"><div class="card">
+    <h1>LalIA no pudo iniciar la UI</h1>
+    <p>No se detectó el servidor de desarrollo (<code>${devUrl}</code>) y tampoco existe un build en <code>dist/</code>.</p>
+    <p>Si estás en desarrollo, ejecuta <code>npm install</code> y luego <code>npm run dev</code>.</p>
+  </div></div></body></html>`;
+  await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1500,
-    height: 920,
-    minWidth: 1150,
-    minHeight: 720,
+    width: 1360,
+    height: 860,
+    minWidth: 980,
+    minHeight: 640,
     backgroundColor: '#070b14',
     title: 'LalIA',
     icon: path.join(__dirname, '../assets/LalIA.ico'),
@@ -68,8 +161,53 @@ function createWindow() {
     },
   });
 
-  if (isDev) mainWindow.loadURL('http://localhost:5173');
-  else mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  mainWindow.setAutoHideMenuBar(true);
+  mainWindow.setMenuBarVisibility(false);
+  loadMainContent();
+  mainWindow.webContents.on('did-fail-load', async (_event, errorCode) => {
+    if (errorCode === -3) return;
+    try {
+      const distIndex = path.join(__dirname, '../dist/index.html');
+      const html = `
+      <!doctype html>
+      <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title>LalIA</title>
+      <style>
+        body{margin:0;background:#070b14;color:#e5e7eb;font-family:Segoe UI,system-ui,sans-serif}
+        .wrap{max-width:860px;margin:40px auto;padding:0 18px}
+        .card{background:#0b1220;border:1px solid #1f2a3d;border-radius:16px;padding:18px}
+        h1{margin:0 0 8px 0;font-size:20px}
+        p{margin:10px 0;color:#cbd5e1;line-height:1.5}
+        code{background:#111827;border:1px solid #1f2a3d;border-radius:8px;padding:2px 6px}
+      </style></head>
+      <body><div class="wrap"><div class="card">
+        <h1>LalIA no pudo cargar la UI</h1>
+        <p>En desarrollo: ejecuta <code>npm install</code> y luego <code>npm run dev</code>.</p>
+        <p>En build: asegúrate de que exista <code>${distIndex}</code> antes de abrir la app.</p>
+      </div></div></body></html>`;
+      await mainWindow?.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    } catch {}
+  });
+  mainWindow.webContents.on('render-process-gone', async () => {
+    try {
+      const html = `
+      <!doctype html>
+      <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title>LalIA</title>
+      <style>
+        body{margin:0;background:#070b14;color:#e5e7eb;font-family:Segoe UI,system-ui,sans-serif}
+        .wrap{max-width:860px;margin:40px auto;padding:0 18px}
+        .card{background:#0b1220;border:1px solid #1f2a3d;border-radius:16px;padding:18px}
+        h1{margin:0 0 8px 0;font-size:20px}
+        p{margin:10px 0;color:#cbd5e1;line-height:1.5}
+      </style></head>
+      <body><div class="wrap"><div class="card">
+        <h1>LalIA se cerró inesperadamente</h1>
+        <p>Abre Herramientas de desarrollador para ver el error (Ver → Herramientas de desarrollador).</p>
+      </div></div></body></html>`;
+      await mainWindow?.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    } catch {}
+  });
 
   mainWindow.webContents.once('did-finish-load', () => {
     if (pendingLaunchPath) {
@@ -144,9 +282,9 @@ function createAppMenu() {
       { label: 'Ejecutar npm run dev', accelerator: 'F5', click: () => safeSend('menu:action', 'run-dev') },
       { label: 'Nueva terminal', click: () => safeSend('menu:action', 'toggle-powershell') },
       { type: 'separator' },
-      { label: 'Página de Eva Vázquez', click: () => shell.openExternal('https://www.evazquez.me') },
-      { label: 'Repositorio de LalIA', click: () => shell.openExternal('https://github.com/equis01/LalIA') },
-      { label: 'Acerca de LalIA', click: () => safeSend('menu:action', 'about') }
+      { label: 'Página oficial', click: () => shell.openExternal(OFFICIAL_WEBSITE) },
+      { label: 'Repositorio oficial', click: () => shell.openExternal(OFFICIAL_REPO) },
+      { label: 'Acerca de LalIA', click: () => openAboutWindow() }
     ] }
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -154,6 +292,79 @@ function createAppMenu() {
 
 function safeSend(channel, payload) {
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send(channel, payload);
+}
+
+function openAboutWindow() {
+  if (aboutWindow && !aboutWindow.isDestroyed()) {
+    aboutWindow.focus();
+    return;
+  }
+  const version = app.getVersion();
+  const html = `
+  <!doctype html>
+  <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Acerca de LalIA</title>
+  <style>
+    body{margin:0;background:#070b14;color:#e5e7eb;font-family:Segoe UI,system-ui,sans-serif}
+    .wrap{padding:18px 18px 16px}
+    .head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+    .logo{width:44px;height:44px;border-radius:12px;background:#0b1220;border:1px solid #1f2a3d;display:grid;place-items:center}
+    h1{margin:0;font-size:18px}
+    .meta{color:#94a3b8;font-size:12px;margin-top:3px}
+    .card{background:#0b1220;border:1px solid #1f2a3d;border-radius:16px;padding:14px}
+    .row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid rgba(148,163,184,.12)}
+    .row:last-child{border-bottom:0}
+    .k{color:#94a3b8}
+    a{color:#93c5fd;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+    button{border:1px solid #1f2a3d;background:#0f172a;color:#e5e7eb;border-radius:10px;padding:7px 10px;cursor:pointer}
+    button:hover{background:#172238;border-color:#2b3a55}
+  </style></head>
+  <body>
+    <div class="wrap">
+      <div class="head">
+        <div class="logo">L</div>
+        <div>
+          <h1>LalIA</h1>
+          <div class="meta">IDE local con Ollama</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row"><div class="k">Versión</div><div>${version}</div></div>
+        <div class="row"><div class="k">Autor</div><div>${APP_AUTHOR}</div></div>
+        <div class="row"><div class="k">Web</div><div><a href="${OFFICIAL_WEBSITE}" target="_blank" rel="noreferrer">${OFFICIAL_WEBSITE}</a></div></div>
+        <div class="row"><div class="k">Repo</div><div><a href="${OFFICIAL_REPO}" target="_blank" rel="noreferrer">${OFFICIAL_REPO}</a></div></div>
+      </div>
+      <div class="actions">
+        <button onclick="window.close()">Cerrar</button>
+      </div>
+    </div>
+  </body></html>`;
+
+  aboutWindow = new BrowserWindow({
+    width: 520,
+    height: 420,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    modal: true,
+    parent: mainWindow || undefined,
+    backgroundColor: '#070b14',
+    title: 'Acerca de LalIA',
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  aboutWindow.setMenuBarVisibility(false);
+  aboutWindow.setAutoHideMenuBar(true);
+  aboutWindow.webContents.setWindowOpenHandler(({ url }) => {
+    try { shell.openExternal(url); } catch {}
+    return { action: 'deny' };
+  });
+  aboutWindow.on('closed', () => { aboutWindow = null; });
+  aboutWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
 }
 
 function isPathInside(parent, child) {
@@ -387,6 +598,7 @@ ipcMain.handle('shell:send', async (_event, command) => {
 ipcMain.handle('shell:stop', async () => { stopShell(); return { ok: true }; });
 ipcMain.handle('system:stats', async () => getStats());
 ipcMain.handle('ollama:listModels', async () => listOllamaModels());
+ipcMain.handle('app:openAbout', async () => { openAboutWindow(); return { ok: true }; });
 
 function listOllamaModels() {
   return new Promise((resolve) => {

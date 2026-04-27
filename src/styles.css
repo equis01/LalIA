@@ -40,3 +40,7 @@
 .context-menu{font-size:13px}
 .floating-history button{flex-shrink:0}
 .statusbar button{cursor:pointer}
+.top-hint{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:520px}
+@media (max-width:1200px){.top-hint{display:none}}
+.chat-panel{width:clamp(280px,28vw,360px)}
+.chat-title-left{font-weight:700;color:#dbeafe}

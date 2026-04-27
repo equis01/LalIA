@@ -3,7 +3,7 @@
 LalIA es un IDE local con asistente integrado usando Ollama. Está pensado para trabajar proyectos reales sin depender de un servicio caro tipo Trae/Codex: abrir carpetas, editar archivos, revisar errores, mandar contexto al chat, visualizar localhost y correr comandos desde la misma app.
 
 Sitio: https://www.evazquez.me  
-Repositorio: https://github.com/equis01/LalIA
+Repositorio: https://github.com/equisx01/lalia
 
 ## Qué incluye esta versión
 
