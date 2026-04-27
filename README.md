@@ -168,4 +168,4 @@ También puedes escribir cualquier URL local.
 
 LalIA es un proyecto de Medios con Valor.
 
-Página: https://mediosconvalor.com
+Página: https://www.evazquez.me
