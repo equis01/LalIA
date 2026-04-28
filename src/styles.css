@@ -59,3 +59,8 @@
 .app-crash-card h2{margin:0 0 8px}
 .app-crash-card p{margin:0 0 10px;color:#cbd5e1}
 .app-crash-card pre{margin:0 0 14px;white-space:pre-wrap;background:#020617;border:1px solid rgba(148,163,184,.2);border-radius:10px;padding:10px;color:#fca5a5}
+
+.home-controls{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:#9fb1c9;font-size:12px}
+.home-controls input{width:140px}
+.home-scale-wrap{transform:scale(var(--home-scale,1));transform-origin:top left;width:calc(100% / var(--home-scale,1));display:flex;flex-direction:column;gap:16px}
+.tab svg{flex-shrink:0}

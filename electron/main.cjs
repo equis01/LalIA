@@ -18,6 +18,7 @@ let pendingLaunchPath = null;
 const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'release', 'build', '.next', '.vite', '.cache', 'coverage', '.dart_tool', '.gradle', 'ios/Pods']);
 const SKIP_EXTS = new Set(['.png','.jpg','.jpeg','.gif','.webp','.ico','.pdf','.zip','.rar','.7z','.exe','.dll','.bin','.mp4','.mov','.avi','.mp3','.wav','.ttf','.otf','.db','.sqlite']);
 const TEXT_EXTS = new Set(['.js','.jsx','.ts','.tsx','.json','.html','.css','.scss','.md','.txt','.yml','.yaml','.xml','.php','.py','.dart','.java','.kt','.swift','.c','.cpp','.h','.cs','.go','.rs','.sql','.env','.gitignore','.ps1','.bat','.cmd']);
+const MAX_TREE_ENTRIES = 2000;
 
 const APP_AUTHOR = 'Eduardo Vázquez (equisx01)';
 const OFFICIAL_WEBSITE = 'https://www.evazquez.me';
@@ -629,7 +630,7 @@ async function buildTree(root, rel = '', depth = 0) {
     .filter(e => !(e.isDirectory() && SKIP_DIRS.has(e.name)))
     .sort((a,b) => Number(b.isDirectory()) - Number(a.isDirectory()) || a.name.localeCompare(b.name));
   const tree = [];
-  for (const e of entries.slice(0, 350)) {
+  for (const e of entries.slice(0, MAX_TREE_ENTRIES)) {
     const childRel = path.join(rel, e.name).replace(/\\/g, '/');
     if (e.isDirectory()) tree.push({ name: e.name, path: childRel, type: 'dir', children: await buildTree(root, childRel, depth + 1) });
     else tree.push({ name: e.name, path: childRel, type: 'file' });
